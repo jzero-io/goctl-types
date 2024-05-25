@@ -21,43 +21,30 @@ func Parse(apiSpec *spec.ApiSpec) ([]GroupSpec, error) {
 		}
 
 		for _, route := range group.Routes {
-			types = append(types, getRequestTypes(route.RequestType)...)
-			types = append(types, getResponseTypes(route.ResponseType)...)
+			types = append(types, getHandlerTypes(route.RequestType)...)
+			types = append(types, getHandlerTypes(route.ResponseType)...)
 		}
 		groupSpec.GroupName = groupName
 		groupSpec.Types = types
 		groupSpecs = append(groupSpecs, groupSpec)
 	}
 
+	// remove duplicate
+
 	return groupSpecs, nil
 }
 
-func getRequestTypes(requestType spec.Type) []spec.Type {
+func getHandlerTypes(handlerType spec.Type) []spec.Type {
 	var requestTypes []spec.Type
 
-	switch requestType.(type) {
+	switch handlerType.(type) {
 	case spec.DefineStruct:
-		t := requestType.(spec.DefineStruct)
+		t := handlerType.(spec.DefineStruct)
 		requestTypes = append(requestTypes, t)
 		for _, m := range t.Members {
-			requestTypes = append(requestTypes, getRequestTypes(m.Type)...)
+			requestTypes = append(requestTypes, getHandlerTypes(m.Type)...)
 		}
 	}
 
 	return requestTypes
-}
-
-func getResponseTypes(responseType spec.Type) []spec.Type {
-	var responseTypes []spec.Type
-
-	switch responseType.(type) {
-	case spec.DefineStruct:
-		t := responseType.(spec.DefineStruct)
-		responseTypes = append(responseTypes, t)
-		for _, m := range t.Members {
-			responseTypes = append(responseTypes, getRequestTypes(m.Type)...)
-		}
-	}
-
-	return responseTypes
 }
