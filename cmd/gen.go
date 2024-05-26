@@ -1,12 +1,20 @@
 package cmd
 
 import (
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/jzero-io/goctl-types/gen"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/plugin"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-	"os"
-	"path/filepath"
+)
+
+var (
+	Debug bool
+
+	FilenameTemplate string
 )
 
 var genCmd = &cobra.Command{
@@ -17,12 +25,24 @@ var genCmd = &cobra.Command{
 }
 
 func do(_ *cobra.Command, _ []string) error {
+	if Debug {
+		time.Sleep(time.Second * 15)
+	}
+
 	p, err := plugin.NewPlugin()
 	if err != nil {
 		return err
 	}
+	if p.Style == "" {
+		p.Style = "gozero"
+	}
 
-	files, err := gen.Generate(p)
+	var opts []gen.Opt
+	opts = append(opts, gen.WithFilenameTemplate(FilenameTemplate))
+
+	g := gen.NewGenerator(p, opts...)
+
+	files, err := g.Generate()
 	if err != nil {
 		return err
 	}
@@ -57,4 +77,7 @@ func do(_ *cobra.Command, _ []string) error {
 
 func init() {
 	rootCmd.AddCommand(genCmd)
+
+	genCmd.Flags().BoolVarP(&Debug, "debug", "", false, "debug")
+	genCmd.Flags().StringVarP(&FilenameTemplate, "filename-template", "", "{{.group}}.types.go", "filename template")
 }

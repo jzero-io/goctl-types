@@ -2,16 +2,17 @@ package gen
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/jzero-io/goctl-types/parser"
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/plugin"
-	"os"
-	"path"
-	"path/filepath"
-	"strings"
+	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 )
 
 type GeneratedFile struct {
@@ -20,10 +21,16 @@ type GeneratedFile struct {
 	Skip    bool
 }
 
-func Generate(plugin *plugin.Plugin) ([]*GeneratedFile, error) {
+type Generator struct {
+	p *plugin.Plugin
+
+	filenameTemplate string
+}
+
+func (g *Generator) Generate() ([]*GeneratedFile, error) {
 	var generatedFiles []*GeneratedFile
 
-	groupSpecs, err := parser.Parse(plugin.Api)
+	groupSpecs, err := parser.Parse(g.p.Api)
 	if err != nil {
 		return nil, err
 	}
@@ -40,18 +47,18 @@ func Generate(plugin *plugin.Plugin) ([]*GeneratedFile, error) {
 		}
 	}
 
-	allTypesRawName := getAllTypesRawName(*plugin.Api)
+	allTypesRawName := getAllTypesRawName(*g.p.Api)
 	t1, _ := lo.Difference(allTypesRawName, allGroupTypesRawNames)
 	for _, t := range t1 {
-		for _, apiType := range plugin.Api.Types {
+		for _, apiType := range g.p.Api.Types {
 			if t == apiType.Name() {
 				baseTypes = append(baseTypes, apiType)
 			}
 		}
 	}
 
-	if _, err := os.Stat(filepath.Join(plugin.Dir, "internal", "types")); err != nil {
-		_ = os.MkdirAll(filepath.Join(plugin.Dir, "internal", "types"), 0o755)
+	if _, err := os.Stat(filepath.Join(g.p.Dir, "internal", "types")); err != nil {
+		_ = os.MkdirAll(filepath.Join(g.p.Dir, "internal", "types"), 0o755)
 	}
 
 	// generate group types
@@ -64,7 +71,7 @@ func Generate(plugin *plugin.Plugin) ([]*GeneratedFile, error) {
 			continue
 		}
 
-		file, err := newGeneratedTypesGoFile(gs.GenTypes, gs.GroupName)
+		file, err := g.newGeneratedTypesGoFile(gs.GenTypes, gs.GroupName)
 		if err != nil {
 			return nil, err
 		}
@@ -72,7 +79,7 @@ func Generate(plugin *plugin.Plugin) ([]*GeneratedFile, error) {
 	}
 
 	// generate base types
-	baseFile, err := newGeneratedTypesGoFile(baseTypes, "")
+	baseFile, err := g.newGeneratedTypesGoFile(baseTypes, "")
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +88,7 @@ func Generate(plugin *plugin.Plugin) ([]*GeneratedFile, error) {
 	return generatedFiles, nil
 }
 
-func newGeneratedTypesGoFile(types []spec.Type, groupName string) (*GeneratedFile, error) {
+func (g *Generator) newGeneratedTypesGoFile(types []spec.Type, groupName string) (*GeneratedFile, error) {
 	typesGoString, err := gogen.BuildTypes(types)
 	if err != nil {
 		return nil, err
@@ -101,13 +108,24 @@ func newGeneratedTypesGoFile(types []spec.Type, groupName string) (*GeneratedFil
 		return nil, err
 	}
 
-	prefix := strings.ReplaceAll(filepath.Dir(groupName), "/", "_") + "_"
+	var styledGroup string
 	if len(strings.Split(groupName, "/")) == 1 {
-		prefix = ""
+		styledGroup = ""
+	} else {
+		styledGroup, err = format.FileNamingFormat(g.p.Style, strings.ReplaceAll(groupName, "/", "_"))
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	fileBase := filepath.Base(groupName)
-	typesGoFilePath := prefix + fileBase[0:len(fileBase)-len(path.Ext(fileBase))] + ".types.go"
+	typesGoFilePathBytes, err := ParseTemplate(map[string]interface{}{
+		"group": styledGroup,
+	}, []byte(g.filenameTemplate))
+	if err != nil {
+		return nil, err
+	}
+
+	typesGoFilePath := string(typesGoFilePathBytes)
 	if groupName == "" {
 		typesGoFilePath = "types.go"
 	}
