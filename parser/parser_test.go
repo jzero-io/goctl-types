@@ -7,7 +7,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	apiSpec, err := parser.Parse(filepath.Join("testdata", "main.api"))
+	apiSpec, err := parser.Parse(filepath.Join("testdata", "desc", "main.api"))
 	if err != nil {
 		t.Fatal(err)
 	}

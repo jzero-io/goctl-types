@@ -12,3 +12,7 @@ var (
 type Response struct {
 	Message string `json:"message"`
 }
+
+type HelloRequest struct {
+	Name string `path:"name"`
+}
