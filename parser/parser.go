@@ -61,10 +61,8 @@ func Parse(apiSpec *spec.ApiSpec) ([]GroupSpec, error) {
 
 func getHandlerTypes(handlerType spec.Type) []spec.Type {
 	var requestTypes []spec.Type
-
-	switch handlerType.(type) {
-	case spec.DefineStruct:
-		t := handlerType.(spec.DefineStruct)
+	t, ok := handlerType.(spec.DefineStruct)
+	if ok {
 		requestTypes = append(requestTypes, t)
 		for _, m := range t.Members {
 			requestTypes = append(requestTypes, getHandlerTypes(m.Type)...)

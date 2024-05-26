@@ -15,16 +15,10 @@ func separateCommonElements(arrays ...[]string) [][]string {
 
 	uniqueArrays := make([][]string, len(arrays))
 
-	commonElements := make([]string, 0)
-
 	for i, arr := range arrays {
 		uniqueArr := make([]string, 0)
 		for _, elem := range arr {
-			if elementCount[elem] == 1 {
-				uniqueArr = append(uniqueArr, elem)
-			} else if elementCount[elem] > 1 {
-				commonElements = append(commonElements, elem)
-			} else {
+			if elementCount[elem] <= 1 {
 				uniqueArr = append(uniqueArr, elem)
 			}
 		}

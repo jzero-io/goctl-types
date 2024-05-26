@@ -73,6 +73,9 @@ func Generate(plugin *plugin.Plugin) ([]*GeneratedFile, error) {
 
 	// generate base types
 	baseFile, err := newGeneratedTypesGoFile(baseTypes, "")
+	if err != nil {
+		return nil, err
+	}
 	generatedFiles = append(generatedFiles, baseFile)
 
 	return generatedFiles, nil
