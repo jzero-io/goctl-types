@@ -6,7 +6,6 @@ type GroupSpec struct {
 	GroupName string
 	Types     []spec.Type // group all types
 	GenTypes  []spec.Type // generated in group types if level == 0
-	BaseTypes []spec.Type // generated in base types if level == 0
 }
 
 func Parse(apiSpec *spec.ApiSpec) ([]GroupSpec, error) {
@@ -29,8 +28,34 @@ func Parse(apiSpec *spec.ApiSpec) ([]GroupSpec, error) {
 		groupSpecs = append(groupSpecs, groupSpec)
 	}
 
-	// remove duplicate
+	for i := range groupSpecs {
+		groupSpecs[i].Types = removeDuplicateTypes(groupSpecs[i].Types)
+	}
 
+	// separate group types
+	groupTypesRawName := make([][]string, 0)
+	for _, group := range groupSpecs {
+		var typesRawName []string
+		for _, name := range group.Types {
+			typesRawName = append(typesRawName, name.Name())
+		}
+		groupTypesRawName = append(groupTypesRawName, typesRawName)
+	}
+
+	elements := separateCommonElements(groupTypesRawName...)
+
+	for i := range groupSpecs {
+		var genTypes []spec.Type
+		elementArray := elements[i]
+		for _, e := range elementArray {
+			for _, t := range groupSpecs[i].Types {
+				if t.Name() == e {
+					genTypes = append(genTypes, t)
+				}
+			}
+		}
+		groupSpecs[i].GenTypes = genTypes
+	}
 	return groupSpecs, nil
 }
 
@@ -47,4 +72,18 @@ func getHandlerTypes(handlerType spec.Type) []spec.Type {
 	}
 
 	return requestTypes
+}
+
+func removeDuplicateTypes(types []spec.Type) []spec.Type {
+	var newTypes []spec.Type
+
+	var existMap = make(map[string]struct{})
+	for _, t := range types {
+		if _, ok := existMap[t.Name()]; !ok {
+			newTypes = append(newTypes, t)
+			existMap[t.Name()] = struct{}{}
+		}
+	}
+
+	return newTypes
 }

@@ -1,0 +1,20 @@
+syntax = "v1"
+
+import "../base/base.api"
+
+type CreateGroupBase {
+    Base string `json:"base"`
+}
+
+type CreateGroupRequest {
+    CreateGroupBase
+}
+
+@server (
+    prefix: /api/v1
+    group: user/group
+)
+service demo-api {
+    @handler Create
+    post /user/group (CreateGroupRequest) returns (Response)
+}

@@ -1,0 +1,21 @@
+syntax = "v1"
+
+import "../base/base.api"
+
+type CreateUserBase {
+    name string `json:"name"`
+}
+
+type CreateUserRequest {
+    CreateUserBase
+}
+
+
+@server (
+    prefix: /api/v1
+    group: user/user
+)
+service demo-api {
+    @handler Create
+    post /user/user/create (CreateUserRequest) returns (Response)
+}

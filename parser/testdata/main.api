@@ -1,3 +1,4 @@
 syntax = "v1"
 
-import "hello.api"
+import "user/user.api"
+import "user/group.api"
