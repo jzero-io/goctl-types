@@ -34,7 +34,7 @@ func do(_ *cobra.Command, _ []string) error {
 		return err
 	}
 	if p.Style == "" {
-		p.Style = "gozero"
+		p.Style = "go_zero"
 	}
 
 	var opts []gen.Opt

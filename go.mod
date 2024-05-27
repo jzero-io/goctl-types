@@ -1,6 +1,6 @@
 module github.com/jzero-io/goctl-types
 
-go 1.22.2
+go 1.19
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
