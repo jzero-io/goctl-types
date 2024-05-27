@@ -110,7 +110,7 @@ func (g *Generator) newGeneratedTypesGoFile(types []spec.Type, groupName string)
 
 	var styledGroup string
 	if len(strings.Split(groupName, "/")) == 1 {
-		styledGroup = ""
+		styledGroup = groupName
 	} else {
 		styledGroup, err = format.FileNamingFormat(g.p.Style, strings.ReplaceAll(groupName, "/", "_"))
 		if err != nil {
