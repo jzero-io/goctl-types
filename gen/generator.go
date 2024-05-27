@@ -108,14 +108,9 @@ func (g *Generator) newGeneratedTypesGoFile(types []spec.Type, groupName string)
 		return nil, err
 	}
 
-	var styledGroup string
-	if len(strings.Split(groupName, "/")) == 1 {
-		styledGroup = groupName
-	} else {
-		styledGroup, err = format.FileNamingFormat(g.p.Style, strings.ReplaceAll(groupName, "/", "_"))
-		if err != nil {
-			return nil, err
-		}
+	styledGroup, err := format.FileNamingFormat(g.p.Style, strings.ReplaceAll(groupName, "/", "_"))
+	if err != nil {
+		return nil, err
 	}
 
 	typesGoFilePathBytes, err := ParseTemplate(map[string]interface{}{

@@ -20,8 +20,8 @@ func Parse(apiSpec *spec.ApiSpec) ([]GroupSpec, error) {
 		}
 
 		for _, route := range group.Routes {
-			types = append(types, getHandlerTypes(route.RequestType)...)
-			types = append(types, getHandlerTypes(route.ResponseType)...)
+			types = append(types, getHandlerTypes(apiSpec, route.RequestType)...)
+			types = append(types, getHandlerTypes(apiSpec, route.ResponseType)...)
 		}
 		groupSpec.GroupName = groupName
 		groupSpec.Types = types
@@ -59,16 +59,25 @@ func Parse(apiSpec *spec.ApiSpec) ([]GroupSpec, error) {
 	return groupSpecs, nil
 }
 
-func getHandlerTypes(handlerType spec.Type) []spec.Type {
+func getHandlerTypes(apiSpec *spec.ApiSpec, handlerType spec.Type) []spec.Type {
 	var requestTypes []spec.Type
-	t, ok := handlerType.(spec.DefineStruct)
-	if ok {
+
+	switch t := handlerType.(type) {
+	case spec.DefineStruct:
 		requestTypes = append(requestTypes, t)
 		for _, m := range t.Members {
-			requestTypes = append(requestTypes, getHandlerTypes(m.Type)...)
+			requestTypes = append(requestTypes, getHandlerTypes(apiSpec, m.Type)...)
+		}
+	case spec.ArrayType:
+		tt, ok := t.Value.(spec.DefineStruct)
+		if ok {
+			for _, x := range apiSpec.Types {
+				if x.Name() == tt.Name() {
+					requestTypes = append(requestTypes, x)
+				}
+			}
 		}
 	}
-
 	return requestTypes
 }
 

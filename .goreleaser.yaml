@@ -7,6 +7,10 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
+    ldflags:
+      - -X github.com/jzero-io/goctl-types/cmd.Version={{.Version}}
+      - -X github.com/jzero-io/goctl-types/cmd.Commit={{.Commit}}
+      - -X github.com/jzero-io/goctl-types/cmd.Date={{.Date}}
     goos:
       - linux
       - windows
