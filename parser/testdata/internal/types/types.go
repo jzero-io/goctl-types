@@ -9,6 +9,14 @@ var (
 	_ = time.Now()
 )
 
+type CreateGroupBase struct {
+	Base string `json:"base"`
+}
+
+type CreateUserBase struct {
+	Name string `json:"name"`
+}
+
 type Response struct {
 	Message string `json:"message"`
 }

@@ -1,0 +1,18 @@
+syntax = "v1"
+
+type BaseTree {
+    id int `json:"id"`
+}
+
+type Tree {
+    base BaseTree `json:"base"`
+}
+
+@server (
+    prefix: /api/v1
+    group: test
+)
+service demo-api {
+    @handler Tree
+    post /test/tree () returns ([]Tree)
+}

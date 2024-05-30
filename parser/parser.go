@@ -1,6 +1,8 @@
 package parser
 
-import "github.com/zeromicro/go-zero/tools/goctl/api/spec"
+import (
+	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
+)
 
 type GroupSpec struct {
 	GroupName string
@@ -74,6 +76,11 @@ func getHandlerTypes(apiSpec *spec.ApiSpec, handlerType spec.Type) []spec.Type {
 			for _, x := range apiSpec.Types {
 				if x.Name() == tt.Name() {
 					requestTypes = append(requestTypes, x)
+				}
+				if ds, ok := x.(spec.DefineStruct); ok {
+					for _, m := range ds.Members {
+						requestTypes = append(requestTypes, getHandlerTypes(apiSpec, m.Type)...)
+					}
 				}
 			}
 		}

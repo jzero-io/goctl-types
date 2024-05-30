@@ -9,10 +9,10 @@ var (
 	_ = time.Now()
 )
 
-type CreateUserRequest struct {
-	CreateUserBase
+type Tree struct {
+	Base BaseTree `json:"base"`
 }
 
-type CreateUserBase struct {
-	Name string `json:"name"`
+type BaseTree struct {
+	Id int `json:"id"`
 }

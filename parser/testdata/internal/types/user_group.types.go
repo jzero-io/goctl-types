@@ -12,7 +12,3 @@ var (
 type CreateGroupRequest struct {
 	CreateGroupBase
 }
-
-type CreateGroupBase struct {
-	Base string `json:"base"`
-}
