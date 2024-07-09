@@ -9,18 +9,10 @@ var (
 	_ = time.Now()
 )
 
-type CreateGroupBase struct {
-	Base string `json:"base"`
+type BaseTree struct {
+	Id int `json:"id"`
 }
 
-type CreateUserBase struct {
-	Name string `json:"name"`
-}
-
-type Response struct {
-	Message string `json:"message"`
-}
-
-type HelloRequest struct {
-	Name string `path:"name"`
+type User struct {
+	Username string `json:"username"`
 }

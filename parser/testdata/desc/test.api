@@ -8,11 +8,24 @@ type Tree {
     base BaseTree `json:"base"`
 }
 
+type User {
+    username string `json:"username"`
+}
+
 @server (
     prefix: /api/v1
-    group: test
+    group: err1
 )
-service demo-api {
-    @handler Tree
-    post /test/tree () returns ([]Tree)
+service test {
+    @handler Error1
+    post /test/error1 () returns ([]Tree)
+}
+
+@server (
+    prefix: /api/v1
+    group: err2
+)
+service test {
+    @handler Error2
+    post /test/error2 () returns (*User)
 }

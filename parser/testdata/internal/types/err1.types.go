@@ -12,7 +12,3 @@ var (
 type Tree struct {
 	Base BaseTree `json:"base"`
 }
-
-type BaseTree struct {
-	Id int `json:"id"`
-}

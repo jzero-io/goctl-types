@@ -74,7 +74,7 @@ func getHandlerTypes(apiSpec *spec.ApiSpec, handlerType spec.Type) []spec.Type {
 		tt, ok := t.Value.(spec.DefineStruct)
 		if ok {
 			for _, x := range apiSpec.Types {
-				if x.Name() == tt.Name() {
+				if x.Name() == tt.RawName {
 					requestTypes = append(requestTypes, x)
 					//if ds, ok := x.(spec.DefineStruct); ok {
 					//	for _, m := range ds.Members {

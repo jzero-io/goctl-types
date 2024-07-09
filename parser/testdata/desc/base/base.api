@@ -1,5 +1,0 @@
-syntax = "v1"
-
-type Response {
-    Message string `json:"message"`
-}
