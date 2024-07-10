@@ -26,6 +26,7 @@ service test {
     group: err2
 )
 service test {
+    @doc "fix, support pointer type"
     @handler Error2
     post /test/error2 () returns (*User)
 }

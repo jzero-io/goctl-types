@@ -62,20 +62,27 @@ func Parse(apiSpec *spec.ApiSpec) ([]GroupSpec, error) {
 }
 
 func getHandlerTypes(apiSpec *spec.ApiSpec, handlerType spec.Type) []spec.Type {
-	var requestTypes []spec.Type
+	var types []spec.Type
 
 	switch t := handlerType.(type) {
+	case spec.PointerType:
+		if tt, ok := t.Type.(spec.DefineStruct); ok {
+			types = append(types, tt)
+			for _, m := range tt.Members {
+				types = append(types, getHandlerTypes(apiSpec, m.Type)...)
+			}
+		}
 	case spec.DefineStruct:
-		requestTypes = append(requestTypes, t)
+		types = append(types, t)
 		for _, m := range t.Members {
-			requestTypes = append(requestTypes, getHandlerTypes(apiSpec, m.Type)...)
+			types = append(types, getHandlerTypes(apiSpec, m.Type)...)
 		}
 	case spec.ArrayType:
 		tt, ok := t.Value.(spec.DefineStruct)
 		if ok {
 			for _, x := range apiSpec.Types {
 				if x.Name() == tt.RawName {
-					requestTypes = append(requestTypes, x)
+					types = append(types, x)
 					//if ds, ok := x.(spec.DefineStruct); ok {
 					//	for _, m := range ds.Members {
 					//		requestTypes = append(requestTypes, getHandlerTypes(apiSpec, m.Type)...)
@@ -86,7 +93,7 @@ func getHandlerTypes(apiSpec *spec.ApiSpec, handlerType spec.Type) []spec.Type {
 			}
 		}
 	}
-	return requestTypes
+	return types
 }
 
 func removeDuplicateTypes(types []spec.Type) []spec.Type {
