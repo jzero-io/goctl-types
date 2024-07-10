@@ -67,8 +67,9 @@ func getHandlerTypes(apiSpec *spec.ApiSpec, handlerType spec.Type) []spec.Type {
 	switch t := handlerType.(type) {
 	case spec.PointerType:
 		if tt, ok := t.Type.(spec.DefineStruct); ok {
-			types = append(types, tt)
-			for _, m := range tt.Members {
+			defineStruct := findDefineStructFromPointerTypeRawName(apiSpec, tt.RawName)
+			types = append(types, defineStruct)
+			for _, m := range defineStruct.Members {
 				types = append(types, getHandlerTypes(apiSpec, m.Type)...)
 			}
 		}
@@ -108,4 +109,15 @@ func removeDuplicateTypes(types []spec.Type) []spec.Type {
 	}
 
 	return newTypes
+}
+
+func findDefineStructFromPointerTypeRawName(apiSpec *spec.ApiSpec, rawName string) spec.DefineStruct {
+	for _, s := range apiSpec.Types {
+		if ds, ok := s.(spec.DefineStruct); ok {
+			if ds.RawName == rawName {
+				return ds
+			}
+		}
+	}
+	return spec.DefineStruct{}
 }

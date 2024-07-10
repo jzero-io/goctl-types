@@ -12,3 +12,7 @@ var (
 type BaseTree struct {
 	Id int `json:"id"`
 }
+
+type User struct {
+	Username string `json:"username"`
+}

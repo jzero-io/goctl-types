@@ -12,6 +12,14 @@ type User {
     username string `json:"username"`
 }
 
+type EmbededError3 {
+    message string `json:"message"`
+}
+
+type Error3 {
+    pointerType *EmbededError3 `json:"pointerType"`
+}
+
 @server (
     prefix: /api/v1
     group: err1
@@ -23,10 +31,9 @@ service test {
 
 @server (
     prefix: /api/v1
-    group: err2
+    group: err3
 )
 service test {
-    @doc "fix, support pointer type"
-    @handler Error2
-    post /test/error2 () returns (*User)
+    @handler Error3
+    post /test/error3 () returns (Error3)
 }
