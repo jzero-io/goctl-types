@@ -10,18 +10,48 @@ type GroupSpec struct {
 	GenTypes  []spec.Type // generated in group types if level == 0
 }
 
+type MergeGroupSpec struct {
+	group     spec.Group
+	groupName string
+}
+
 func Parse(apiSpec *spec.ApiSpec) ([]GroupSpec, error) {
 	var groupSpecs []GroupSpec
 
+	// 相同 group 名就合并 routes
+	var mergeGroupSpecs []MergeGroupSpec
 	for _, group := range apiSpec.Service.Groups {
+		var groupName string
+		if name, ok := group.Annotation.Properties["group"]; ok {
+			groupName = name
+		} else {
+			continue // 如果没有 group 属性，跳过这个 group
+		}
+
+		// 查找是否已经存在相同组名的 MergeGroupSpec
+		found := false
+		for i, mergeGroupSpec := range mergeGroupSpecs {
+			if groupName == mergeGroupSpec.groupName {
+				mergeGroupSpecs[i].group.Routes = append(mergeGroupSpecs[i].group.Routes, group.Routes...)
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			mergeGroupSpecs = append(mergeGroupSpecs, MergeGroupSpec{group: group, groupName: groupName})
+		}
+	}
+
+	for _, mergeGroup := range mergeGroupSpecs {
 		var groupName string
 		var types []spec.Type
 		var groupSpec GroupSpec
-		if _, ok := group.Annotation.Properties["group"]; ok {
-			groupName = group.Annotation.Properties["group"]
+		if _, ok := mergeGroup.group.Annotation.Properties["group"]; ok {
+			groupName = mergeGroup.group.Annotation.Properties["group"]
 		}
 
-		for _, route := range group.Routes {
+		for _, route := range mergeGroup.group.Routes {
 			types = append(types, getHandlerTypes(apiSpec, route.RequestType)...)
 			types = append(types, getHandlerTypes(apiSpec, route.ResponseType)...)
 		}

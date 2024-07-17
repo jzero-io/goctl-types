@@ -16,3 +16,7 @@ type Error3 struct {
 type EmbededError3 struct {
 	Message string `json:"message"`
 }
+
+type Error3_2 struct {
+	PointerType *EmbededError3 `json:"pointerType"`
+}

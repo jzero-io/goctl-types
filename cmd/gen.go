@@ -7,6 +7,7 @@ import (
 
 	"github.com/jzero-io/goctl-types/gen"
 	"github.com/spf13/cobra"
+	apiParser "github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/plugin"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
@@ -35,6 +36,11 @@ func do(_ *cobra.Command, _ []string) error {
 	}
 	if p.Style == "" {
 		p.Style = "go_zero"
+	}
+
+	p.Api, err = apiParser.Parse(p.ApiFilePath, "")
+	if err != nil {
+		return err
 	}
 
 	var opts []gen.Opt
